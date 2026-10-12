@@ -8,7 +8,7 @@ class HelloControllerTest {
 
     @Test
     void helloReturnsExpectedMessage() {
-        HelloController controller = new HelloController();
+        HelloController controller = new HelloController(null);
         assertEquals("Hello from my DevOps project!", controller.hello());
     }
 }
