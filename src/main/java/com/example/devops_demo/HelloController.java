@@ -22,4 +22,4 @@ public class HelloController {
         visits.save(new Visit());
         return "Total visits: " + visits.count();
     }
-}
+}// test
