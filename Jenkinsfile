@@ -23,27 +23,29 @@ pipeline {
             }
         }
 
-        stage('build image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-repo',
-                                                  usernameVariable: 'USER',
-                                                  passwordVariable: 'PASS')]) {
-                    sh 'docker build -t $USER/$IMAGE_NAME:$IMAGE_TAG .'
-                }
-            }
-        }
-
-        stage('push image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-repo',
-                                                  usernameVariable: 'USER',
-                                                  passwordVariable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    retry(3) {
-                        sh 'docker push $USER/$IMAGE_NAME:$IMAGE_TAG'
+                stage('build image') {
+                    when { branch 'main' }
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'docker-hub-repo',
+                                                          usernameVariable: 'USER',
+                                                          passwordVariable: 'PASS')]) {
+                            sh 'docker build -t $USER/$IMAGE_NAME:$IMAGE_TAG .'
+                        }
                     }
                 }
-            }
-        }
+
+                stage('push image') {
+                    when { branch 'main' }
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'docker-hub-repo',
+                                                          usernameVariable: 'USER',
+                                                          passwordVariable: 'PASS')]) {
+                            sh 'echo $PASS | docker login -u $USER --password-stdin'
+                            retry(3) {
+                                sh 'docker push $USER/$IMAGE_NAME:$IMAGE_TAG'
+                            }
+                        }
+                    }
+                }
     }
 }
