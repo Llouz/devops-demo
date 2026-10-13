@@ -42,7 +42,7 @@ pipeline {
                                                           passwordVariable: 'PASS')]) {
                             sh 'echo $PASS | docker login -u $USER --password-stdin'
                             retry(3) {
-                                sh 'docker push $USER/$IMAGE_NAME:$IMAGE_TAG'
+                                sh 'docker push $USER/$IMAGE_NAME:$IMAGE_TAG   '
                             }
                         }
                     }
