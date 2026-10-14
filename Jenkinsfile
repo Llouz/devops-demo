@@ -60,6 +60,7 @@ pipeline {
         }
 
 
+
         stage('increment version') {
             when {
                 branch 'main'
@@ -71,11 +72,13 @@ pipeline {
                 script {
                     incrementVersion()
 
-                    def pom = readMavenPom file: 'pom.xml'
-                    def version = pom.version.toString()
+                    def version = sh(
+                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
+                        returnStdout: true
+                    ).trim()
 
                     if (!version || version == 'null') {
-                        error "Invalid Maven version"
+                        error "Invalid application version: ${version}"
                     }
 
                     env.APP_VERSION = version
@@ -84,6 +87,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
