@@ -16,7 +16,6 @@ pipeline {
     }
 
     environment {
-        APP_VERSION = ''
         SKIP_VERSIONING = 'false'
     }
 
@@ -68,24 +67,18 @@ pipeline {
             }
             steps {
                 script {
-                    incrementVersion()
+                    def newVersion = incrementVersion()
 
-                    def version = sh(
-                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
-                        returnStdout: true
-                    ).trim()
-
-                    if (!version || version == 'null') {
-                        error "Invalid Maven version: ${version}"
+                    if (!newVersion || newVersion.toString() == 'null') {
+                        error "Invalid version returned by incrementVersion"
                     }
 
-                    env.APP_VERSION = version.toString()
+                    env.APP_VERSION = newVersion.toString()
 
                     echo "New application version: ${env.APP_VERSION}"
                 }
             }
         }
-
         stage('build jar') {
             when {
                 expression {
