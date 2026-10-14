@@ -70,24 +70,18 @@ pipeline {
             }
             steps {
                 script {
-                    incrementVersion()
+                    def newVersion = incrementVersion()
 
-                    def version = sh(
-                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
-                        returnStdout: true
-                    ).trim()
-
-                    if (!version || version == 'null') {
-                        error "Invalid application version: ${version}"
+                    if (!newVersion || newVersion == 'null') {
+                        error "Invalid version returned by incrementVersion"
                     }
 
-                    env.APP_VERSION = version
+                    env.APP_VERSION = newVersion.toString()
 
                     echo "New application version: ${env.APP_VERSION}"
                 }
             }
         }
-
 
 
 
@@ -102,6 +96,7 @@ pipeline {
             }
         }
 
+
         stage('build and push image') {
             when {
                 branch 'main'
@@ -110,9 +105,16 @@ pipeline {
                 }
             }
             steps {
-                buildImage("ellouz/devops-demo:${env.APP_VERSION}")
+                script {
+                    if (!env.APP_VERSION || env.APP_VERSION == 'null') {
+                        error "APP_VERSION is missing. Docker build stopped."
+                    }
+
+                    buildImage("ellouz/devops-demo:${env.APP_VERSION}")
+                }
             }
         }
+
 
         stage('commit and push version') {
             when {
