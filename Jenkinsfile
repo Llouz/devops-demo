@@ -59,6 +59,7 @@ pipeline {
             }
         }
 
+
         stage('increment version') {
             when {
                 branch 'main'
@@ -68,11 +69,18 @@ pipeline {
             }
             steps {
                 script {
-                    env.APP_VERSION = incrementVersion()
+                    incrementVersion()
+
+                    env.APP_VERSION = sh(
+                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
+                        returnStdout: true
+                    ).trim()
+
                     echo "New application version: ${env.APP_VERSION}"
                 }
             }
         }
+
 
         stage('build jar') {
             when {
