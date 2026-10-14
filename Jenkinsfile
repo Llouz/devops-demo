@@ -71,15 +71,20 @@ pipeline {
                 script {
                     incrementVersion()
 
-                    env.APP_VERSION = sh(
-                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
-                        returnStdout: true
-                    ).trim()
+                    def pom = readMavenPom file: 'pom.xml'
+                    def version = pom.version.toString()
+
+                    if (!version || version == 'null') {
+                        error "Invalid Maven version"
+                    }
+
+                    env.APP_VERSION = version
 
                     echo "New application version: ${env.APP_VERSION}"
                 }
             }
         }
+
 
 
         stage('build jar') {
