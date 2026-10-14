@@ -1,13 +1,12 @@
+library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
+    [$class: 'GitSCMSource',
+     remote: 'https://github.com/Llouz/jenkins-shared-library.git'])
+
 pipeline {
     agent any
 
     tools {
         maven 'Maven'
-    }
-
-    environment {
-        IMAGE_NAME = 'devops-demo'
-        IMAGE_TAG  = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -19,33 +18,15 @@ pipeline {
 
         stage('build jar') {
             steps {
-                sh 'mvn package -DskipTests'
+                buildJar()
             }
         }
 
-                stage('build image') {
-                    when { branch 'main' }
-                    steps {
-                        withCredentials([usernamePassword(credentialsId: 'docker-hub-repo',
-                                                          usernameVariable: 'USER',
-                                                          passwordVariable: 'PASS')]) {
-                            sh 'docker build -t $USER/$IMAGE_NAME:$IMAGE_TAG .'
-                        }
-                    }
-                }
-
-                stage('push image') {
-                    when { branch 'main' }
-                    steps {
-                        withCredentials([usernamePassword(credentialsId: 'docker-hub-repo',
-                                                          usernameVariable: 'USER',
-                                                          passwordVariable: 'PASS')]) {
-                            sh 'echo $PASS | docker login -u $USER --password-stdin'
-                            retry(3) {
-                                sh 'docker push $USER/$IMAGE_NAME:$IMAGE_TAG   '
-                            }
-                        }
-                    }
-                }
+        stage('build and push image') {
+            when { branch 'main' }
+            steps {
+                buildImage("ellouz/devops-demo:${BUILD_NUMBER}")
+            }
+        }
     }
 }
