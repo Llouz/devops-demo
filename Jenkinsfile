@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('test') {
+        stage('testing') {
             when {
                 expression {
                     env.SKIP_VERSIONING != 'true'
