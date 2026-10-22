@@ -9,7 +9,6 @@ pipeline {
     tools {
         maven 'Maven'
     }
-    //adding cmnts
 
 
     options {
